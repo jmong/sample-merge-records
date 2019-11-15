@@ -28,6 +28,15 @@ func Merge(a, b []string) (bool, []string) {
     return intersect, a
 }
 
+func InList(needle string, haystack []string) bool {
+    for _, v := range haystack {
+        if v == needle {
+            return true
+        }
+    }
+    return false
+}
+
 func main() {
     // More records added here from the original problem set.
     // The following accounts should merge:
@@ -43,9 +52,10 @@ func main() {
         []string{"Mary", "maryC@mail.com", "maryD@mail.com"},
         []string{"Mary", "maryC@mail.com", "maryE@mail.com"},
     }
-    var outputs [][]string
-
     fmt.Printf("Accounts: %v\n", accounts)
+
+    // Solution 1 //
+    var outputs [][]string
     for _, account := range accounts {
         var intersect bool = false
         var union []string
@@ -64,6 +74,42 @@ func main() {
             outputs = append(outputs, account)
         }
     }
-
     fmt.Printf("Outputs: %v\n", outputs)
+    // End Solution 1 //
+
+    // Solution 2 - work-in-progress //
+    type Records struct {
+        account []string
+    }
+    var emailtable = make(map[string]*Records)
+    var outputs2 []*Records
+    for _, account := range accounts {
+        name, emails := account[0], account[1:]
+        for _, email := range emails {
+            // There is a record, append emails to it
+            if val, ok := emailtable[email]; ok == true {
+                acct := val.account
+                if InList(email, acct) == false {
+                    acct = append(acct, email)
+                }
+                val.account = acct
+            } else {  // No existing record, create one
+                acct := []string{name}
+                acct = append(acct, emails...)
+                rec := &Records{account: acct}
+                emailtable[email] = rec
+                outputs2 = append(outputs2, rec)
+            }
+        }
+    }
+
+    fmt.Println("Emailtable: ")
+    //for k, v := range emailtable {
+    //    fmt.Printf("email=%s, val=%v\n", k, v)
+    //}
+    fmt.Println("Outputs2:")
+    for _, v := range outputs2 {
+        fmt.Printf("%v\n", v)
+    }
+    // End Solution 2 //
 }
